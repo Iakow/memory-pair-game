@@ -34,7 +34,7 @@ const mountCards = () => {
 
 mountCards();
 
-const flipCard = (...cards) => { // вторая карта сюда попадает с другим isFace
+const flipCard = (...cards) => {
   return new Promise((resolve, reject) => {
     const isSameFaces = cards.every((card => card.cardData.isFace == cards[0].cardData.isFace));
 
@@ -71,7 +71,7 @@ const flipCard = (...cards) => { // вторая карта сюда попад�
         clearInterval(goAnimate);
         resolve(cards[0]);
       };
-    }, 10);
+    }, 16);
   })
 }
 
@@ -81,20 +81,26 @@ const getNewHandler = () => {
   let clickIsEnable = true;
 
   const addCardToOpen = (card) => {
+    const flipBack = () => {
+      flipCard(card, shownCard).then(() => clickIsEnable = true);
+      shownCard = null;
+    }
+
+    const hide = () => {
+      shownCard.style.display = 'none';
+      card.style.display = 'none';
+      shownCard = null;
+      clickIsEnable = true
+    }
+
     if (!shownCard) {
       shownCard = card;
       clickIsEnable = true
     } else {
       if (shownCard.cardData.link === card.cardData.link) {
-        shownCard.style.display = 'none';
-        card.style.display = 'none';
-        shownCard = null;
-        clickIsEnable = true
+        setTimeout(() => hide(), 500);
       } else {
-        console.log('need pause');
-        
-        flipCard(card, shownCard).then(() => clickIsEnable = true);
-        shownCard = null;
+        setTimeout(() => flipBack(), 500);
       }
     }
   }

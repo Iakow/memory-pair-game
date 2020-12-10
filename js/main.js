@@ -34,69 +34,81 @@ const mountCards = () => {
 
 mountCards();
 
+const flipCard = (...cards) => { // вторая карта сюда попадает с другим isFace
+  return new Promise((resolve, reject) => {
+    const isSameFaces = cards.every((card => card.cardData.isFace == cards[0].cardData.isFace));
 
-const flipCard = (el, start, done) => {
-
-  if (start) start();
-  const { link, isFace } = el.cardData;
-
-  let angle = isFace ? 180 : 0;
-
-  const toggleCardBG = () => {
-    if (isFace) {
-      el.style.backgroundImage = 'none';
-      el.cardData.isFace = false;
-    } else {
-      el.style.backgroundImage = `url(${link})`;
-      el.cardData.isFace = true;
+    if (!isSameFaces) {
+      reject();
     }
-  }
 
-  const goAnimate = setInterval(() => {
-    angle += 5;
-    el.style.transform = `rotateY(${angle}deg)`;
+    let angle = cards[0].cardData.isFace ? 180 : 0;
 
-    if (angle % 90 === 0) toggleCardBG();
+    const toggleBackgroundImg = (card) => {
+      const { link, isFace } = card.cardData;
+      if (isFace) {
+        card.style.backgroundImage = 'none';
+        card.cardData.isFace = false;
+      } else {
+        card.style.backgroundImage = `url(${link})`;
+        card.cardData.isFace = true;
+      }
+    }
 
-    if (angle % 180 === 0) {
-      clearInterval(goAnimate);
-      if (done) done(el);
-    };
-  }, 10);
+    const goSingleFrame = (card) => {
+      angle += 5;
+      card.style.transform = `rotateY(${angle}deg)`;
+    }
+
+    const goAnimate = setInterval(() => {
+      cards.forEach(card => goSingleFrame(card));
+
+      if (angle === 90 || angle === 270) {
+        cards.forEach(card => toggleBackgroundImg(card));
+      }
+
+      if (angle % 180 === 0) {
+        clearInterval(goAnimate);
+        resolve(cards[0]);
+      };
+    }, 10);
+  })
 }
 
-const getHandler = () => {
-  let checkedCard = null;
 
-  let enableHandle = true;
+const getNewHandler = () => {
+  let shownCard = null;
+  let clickIsEnable = true;
 
-  const done = (el) => {
-    enableHandle = true;
-    
-    if (!checkedCard) {
-      checkedCard = el;
+  const addCardToOpen = (card) => {
+    if (!shownCard) {
+      shownCard = card;
+      clickIsEnable = true
     } else {
-      if (checkedCard.cardData.link === el.cardData.link) {
-        el.style.display = 'none';
-        checkedCard.style.display = 'none';
-        checkedCard = null;
+      if (shownCard.cardData.link === card.cardData.link) {
+        shownCard.style.display = 'none';
+        card.style.display = 'none';
+        shownCard = null;
+        clickIsEnable = true
       } else {
-        flipCard(el);
-        flipCard(checkedCard);
-        checkedCard = null;
+        console.log('need pause');
+        
+        flipCard(card, shownCard).then(() => clickIsEnable = true);
+        shownCard = null;
       }
     }
   }
 
-  const start = () => {
-    enableHandle = false
-  }
 
   return (e) => {
     if (e.target.className !== 'card') return;
-    if (!enableHandle) return;
-    flipCard(e.target, start, done);
+    if (!clickIsEnable) return;
+    if (e.target === shownCard) return;
+
+    clickIsEnable = false;
+    flipCard(e.target)
+      .then(addCardToOpen)
   }
 }
 
-container.addEventListener('click', getHandler());
+container.addEventListener('click', getNewHandler());

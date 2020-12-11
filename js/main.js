@@ -1,3 +1,4 @@
+{/* <link rel="preload" href="./img/Alfa_Romeo_158-159.jpg" as="image"></link> */}
 const imagesConfig = [
   'img/mask1.png',
   'img/mask2.png',
@@ -42,6 +43,18 @@ const mountCards = () => {
 }
 
 mountCards();
+
+const mountLink = (href) => {
+  const link = document.createElement('link');
+  link.setAttribute('rel', 'preload');
+  link.setAttribute('href', href);
+  link.setAttribute('as', 'image');
+  document.head.appendChild(link);
+}
+
+shufleImages.forEach(item => mountLink(item))
+
+
 
 /* не лучше ли раздавать классы? */
 

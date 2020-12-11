@@ -34,87 +34,108 @@ const mountCards = () => {
 
 mountCards();
 
-const flipCard = (...cards) => {
-  return new Promise((resolve, reject) => {
-    const isSameFaces = cards.every((card => card.cardData.isFace == cards[0].cardData.isFace));
+/* не лучше ли раздавать классы? */
 
-    if (!isSameFaces) {
-      reject();
-    }
+
+const animateFlip = (delay, freq, revertDirection, ...cards) => {
+  return new Promise((resolve, reject) => {
+    /* const isSameFaces = cards.every((card => card.cardData.isFace == cards[0].cardData.isFace));
+
+    if (!isSameFaces) reject(); */
 
     let angle = cards[0].cardData.isFace ? 180 : 0;
+
+    const direction = revertDirection ? -1 : 1;
+
+    const angleIncrement = 5 * direction;
 
     const toggleBackgroundImg = (card) => {
       const { link, isFace } = card.cardData;
       if (isFace) {
         card.style.backgroundImage = 'none';
         card.cardData.isFace = false;
+        card.style.boxShadow = '-3px 3px 3px 0px rgba(0, 0, 0, 0.75)';
       } else {
         card.style.backgroundImage = `url(${link})`;
         card.cardData.isFace = true;
+        card.style.boxShadow = '3px 3px 3px 0px rgba(0, 0, 0, 0.75)';
       }
     }
 
-    const goSingleFrame = (card) => {
-      angle += 5;
+    const animateFrame = (card) => {
+      angle += angleIncrement;
       card.style.transform = `rotateY(${angle}deg)`;
     }
 
-    const goAnimate = setInterval(() => {
-      cards.forEach(card => goSingleFrame(card));
+    const goAnimate = () => {
+      const interval = setInterval(() => {
+        cards.forEach(card => animateFrame(card));
 
-      if (angle === 90 || angle === 270) {
-        cards.forEach(card => toggleBackgroundImg(card));
-      }
+        if (Math.abs(angle) === 90 || Math.abs(angle) === 270) {
+          cards.forEach(card => toggleBackgroundImg(card));
+        }
 
-      if (angle % 180 === 0) {
-        clearInterval(goAnimate);
-        resolve(cards[0]);
-      };
-    }, 16);
+        if (Math.abs(angle) % 180 === 0) {
+          clearInterval(interval);
+          resolve(cards[0]);
+        };
+      }, freq);
+    };
+
+    delay ? setTimeout(goAnimate, delay) : goAnimate();
   })
 }
 
 
-const getNewHandler = () => {
-  let shownCard = null;
-  let clickIsEnable = true;
+const getHandler = () => {
+  let pickedCards = [];
 
-  const addCardToOpen = (card) => {
-    const flipBack = () => {
-      flipCard(card, shownCard).then(() => clickIsEnable = true);
-      shownCard = null;
-    }
-
-    const hide = () => {
-      shownCard.style.display = 'none';
-      card.style.display = 'none';
-      shownCard = null;
-      clickIsEnable = true
-    }
-
-    if (!shownCard) {
-      shownCard = card;
-      clickIsEnable = true
-    } else {
-      if (shownCard.cardData.link === card.cardData.link) {
-        setTimeout(() => hide(), 500);
-      } else {
-        setTimeout(() => flipBack(), 500);
-      }
-    }
+  const pickCard = (card) => {
+    pickedCards.push(card);
   }
 
+  const checkMatch = () => {
+    return pickedCards[0].cardData.link === pickedCards[1].cardData.link
+  }
+
+  const openCard = (card) => {
+    return animateFlip(0, 6, false, card);
+  }
+
+  const closeCards = () => {
+    const [firstCard, secondCard] = pickedCards;
+    animateFlip(500, 30, true, firstCard, secondCard);
+    pickedCards.length = 0;
+  }
+
+  const discardСards = () => {
+    const [firstCard, secondCard] = pickedCards;
+
+    setTimeout(() => {
+      firstCard.style.display = 'none';
+      secondCard.style.display = 'none';
+    }, 500)
+
+    pickedCards.length = 0;
+  }
 
   return (e) => {
     if (e.target.className !== 'card') return;
-    if (!clickIsEnable) return;
-    if (e.target === shownCard) return;
+    if (pickedCards.some((card) => card === e.target)) return;
+    if (pickedCards.length === 2) return;
 
-    clickIsEnable = false;
-    flipCard(e.target)
-      .then(addCardToOpen)
+    pickCard(e.target);
+
+    if (pickedCards.length === 1) {
+      openCard(pickedCards[0]);
+      return;
+    }
+
+    if (pickedCards.length === 2) {
+      openCard(pickedCards[1])
+        .then(() => checkMatch() ? discardСards() : closeCards());
+    }
   }
 }
 
-container.addEventListener('click', getNewHandler());
+container.addEventListener('click', getHandler());

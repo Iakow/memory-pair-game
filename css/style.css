@@ -43,15 +43,18 @@ body {
 
 .cardPlace {
   position: relative;
-  perspective: 1200px;
-  background-color: rgb(228, 228, 228);
-  border-radius: 10px;
+  perspective: 2000px;
+  /* background-color: rgb(228, 228, 228); */
+  border: 1px solid rgb(221, 221, 221);
+  border-radius: 8px;
 }
 
 .card {
-  background: center center no-repeat gray;
+  background: center center no-repeat rgb(119, 119, 119);
   position: absolute;
   height: 100%;
   width: 100%;
-  border-radius: 10px;
+  border-radius: 8px;
+  /* удалить */
+  box-shadow: -3px 3px 3px 0px rgba(0, 0, 0, 0.753);
 }

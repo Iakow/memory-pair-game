@@ -1,13 +1,22 @@
 const imagesConfig = [
-  'img/avia.png',
-  'img/cloud.png',
-  'img/drink.png',
-  'img/earth.png',
-  'img/food.png',
-  'img/learn.png'
-];
+  'img/mask1.png',
+  'img/mask2.png',
+  'img/mask3.png',
+  'img/mask4.png',
+  'img/mask5.png',
+  'img/mask6.png',
+  'img/mask7.png',
+  'img/mask9.png',
+  'img/mask10.png',
+  'img/mask11.png',
+  'img/mask12.png',
+  'img/mask13.png',
+  'img/mask14.png',
+  'img/mask15.png',
+  'img/mask16.png',
+].sort(() => 0.5 - Math.random());
 
-const shufleImages = [...imagesConfig, ...imagesConfig].sort(() => 0.5 - Math.random());
+const shufleImages = [...imagesConfig.slice(0, 6), ...imagesConfig.slice(0, 6)];
 
 const createCard = (src, id) => {
   const cardPlace = document.createElement('div');

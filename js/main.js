@@ -40,6 +40,7 @@ images.forEach(item => preLoadImgs(item));
 /* New random set 12 cards for game */
 
 let cardFaceImgs;
+let startTime;
 
 const newGame = () => {
   const getNewImgSet = () => {
@@ -79,6 +80,8 @@ const newGame = () => {
   }
 
   mountCards();
+
+  startTime = Date.now();
 }
 
 newGame();
@@ -176,9 +179,15 @@ const getHandler = () => {
   }
 
   const win = () => {
+    const endTime = Date.now();
+
+    const time = new Date (endTime - startTime);
+
+    const seconds = time.getSeconds();
+    
     alert(`Congratulations!\n` +
            `Moves: ${moves}\n` +
-           `Time: ${'soon'}`);
+           `Time: ${seconds}sec`);
     newGame();
   }
 

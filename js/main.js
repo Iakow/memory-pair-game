@@ -20,30 +20,50 @@ const images = [
   'img/mask15.png',
   'img/mask16.png'
 ];
+// must be css 
 const cardBack = `none`;
 
 /* preload */
-const preLoadImgs = (href) => {
-  const link = document.createElement('link');
-  link.setAttribute('rel', 'preload');
-  link.setAttribute('href', href);
-  link.setAttribute('as', 'image');
-  document.head.appendChild(link);
+const preloadImages = () => {
+  const addLink = (href) => {
+    const link = document.createElement('link');
+
+    link.setAttribute('rel', 'preload');
+    link.setAttribute('href', href);
+    link.setAttribute('as', 'image');
+
+    document.head.appendChild(link);
+  }
+
+  images.forEach(item => addLink(item));
 };
 
-images.forEach(item => preLoadImgs(item));
-
-
-
+preloadImages();
 ////////////////////////////////////////////////////////////////////////
 
-/* New random set 12 cards for game */
 
-let cardFaceImgs;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const SETTING = new Map();
+
 let startTime;
 
 const newGame = () => {
-  const getNewImgSet = () => {
+  const getImgSelection = () => {
     const randomImgSet = [...images].sort(() => 0.5 - Math.random()).slice(0, 6);
 
     const shuffledImgSet = randomImgSet.concat(randomImgSet).sort(() => 0.5 - Math.random());
@@ -51,15 +71,14 @@ const newGame = () => {
     return shuffledImgSet;
   }
 
-  cardFaceImgs = getNewImgSet()
+  cardFaces = getImgSelection();
 
-  const createCard = (id) => {
+  const createCard = () => {
     const cardPlace = document.createElement('div');
     cardPlace.className = 'cardPlace';
 
     const card = document.createElement('div');
     card.className = 'card';
-    card.id = `card-${id}`;
     card.style.transform = `rotateY(0deg)`;
     card.style.backgroundImage = cardBack;
 
@@ -67,19 +86,19 @@ const newGame = () => {
     return cardPlace;
   }
 
-  const mountCards = () => {
-    const container = document.querySelector('.container');
-    const bufer = document.createElement('div');
+  const container = document.querySelector('.container');
+  container.innerHTML = '';
 
-    cardFaceImgs.forEach((src, index) => {
-      bufer.appendChild(createCard(index))
-    });
+  const fragment = document.createDocumentFragment();
 
-    container.innerHTML = bufer.innerHTML;
-    bufer.remove();
-  }
+  cardFaces.forEach((img, index) => {
+    const newCard = createCard(index);
 
-  mountCards();
+    fragment.appendChild(newCard);
+    SETTING.set(newCard.firstChild, `url("${img}")`);
+  });
+
+  container.appendChild(fragment);
 
   startTime = Date.now();
 }
@@ -95,10 +114,6 @@ const animateFlip = (delay, freq, ...cards) => {
     return +angle;
   }
 
-  const getCardIDNumber = (card) => { // если задать объект соответствия, операция не нужная.
-    return card.id.split('-')[1]
-  }
-
   let angle = getCardAngle(cards[0]); // мож чекнуть?
   const direction = angle === 0 ? 1 : -1;
   const angleIncrement = 5 * direction;
@@ -106,7 +121,7 @@ const animateFlip = (delay, freq, ...cards) => {
   const toggleBGimage = () => {
     cards.forEach((card) => {
       if (card.style.backgroundImage === cardBack) {
-        card.style.backgroundImage = `url(${cardFaceImgs[getCardIDNumber(card)]})`;
+        card.style.backgroundImage = SETTING.get(card);
       } else {
         card.style.backgroundImage = cardBack;
       }
@@ -175,19 +190,21 @@ const getHandler = () => {
   }
 
   const checkWin = () => {
-    if (discardedCards === 12) win();
+    if (discardedCards === 12) win(); // возможно здесь проблема, т.к. нет 12
   }
 
   const win = () => {
     const endTime = Date.now();
 
-    const time = new Date (endTime - startTime);
+    const time = new Date(endTime - startTime);
 
     const seconds = time.getSeconds();
-    
+    const mins = time.getMinutes();
+
     alert(`Congratulations!\n` +
-           `Moves: ${moves}\n` +
-           `Time: ${seconds}sec`);
+      `Moves: ${moves}\n` +
+      `Time: ${mins}min ${seconds}sec`);
+
     newGame();
   }
 

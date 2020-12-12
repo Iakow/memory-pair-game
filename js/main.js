@@ -1,4 +1,3 @@
-{/* <link rel="preload" href="./img/Alfa_Romeo_158-159.jpg" as="image"></link> */}
 const imagesConfig = [
   'img/mask1.png',
   'img/mask2.png',
@@ -14,10 +13,20 @@ const imagesConfig = [
   'img/mask13.png',
   'img/mask14.png',
   'img/mask15.png',
-  'img/mask16.png',
-].sort(() => 0.5 - Math.random());
+  'img/mask16.png'
+];
 
-const shufleImages = [...imagesConfig.slice(0, 6), ...imagesConfig.slice(0, 6)];
+const getNewShuffledImgSet = () => {
+  const randomImgSet = [...imagesConfig].sort(() => 0.5 - Math.random()).slice(0, 6);
+
+  const shuffledImgSet = randomImgSet.concat(randomImgSet).sort(() => 0.5 - Math.random());
+
+  return shuffledImgSet;
+}
+
+/* елементы нужно фармить на отобранных 6 картинках, а не 12 */
+
+const shufleImages = getNewShuffledImgSet();
 
 const createCard = (src, id) => {
   const cardPlace = document.createElement('div');
@@ -29,20 +38,23 @@ const createCard = (src, id) => {
   card.cardData = { 'link': src, isFace: false };
 
   cardPlace.appendChild(card);
-
   return cardPlace;
 }
 
 const container = document.querySelector('.container');
 
 const mountCards = () => {
+  // создать фаргмент
+  // запушить все туда
+  // переписать его в контейнер
   shufleImages.forEach((src, index) => {
     /* переделать чтобы без рефлоу сто раз */
     container.appendChild(createCard(src, index))
-  })
+  });
 }
 
 mountCards();
+
 
 const mountLink = (href) => {
   const link = document.createElement('link');
@@ -56,7 +68,6 @@ shufleImages.forEach(item => mountLink(item))
 
 
 
-/* не лучше ли раздавать классы? */
 
 
 const animateFlip = (delay, freq, revertDirection, ...cards) => {
@@ -99,7 +110,7 @@ const animateFlip = (delay, freq, revertDirection, ...cards) => {
 
         if (Math.abs(angle) % 180 === 0) {
           clearInterval(interval);
-          resolve(cards[0]);
+          resolve(cards[0]); // ???????????????????????????
         };
       }, freq);
     };
@@ -108,9 +119,48 @@ const animateFlip = (delay, freq, revertDirection, ...cards) => {
   })
 }
 
+const animateDiscard = (...cards) => {
+  return new Promise((resolve, regect) => {
+    increment = -5;
+    opacity = 100;
+
+    const interval = setInterval(() => {
+      opacity += increment;
+      cards.forEach(card => card.style.opacity = `${opacity}%`);
+
+      if (opacity == 0) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 20);
+  })
+}
+
+
+
+
+
+
+const newGame = () => {
+  /* 
+    получить новый набор карт
+    перемешать
+
+    что делать со скрытыми элементами?
+    сформировать новый сет
+    заменить старый на новый
+
+    что с хендлером?
+    Пускай остается на контейнере
+  */
+}
+
+
+
 
 const getHandler = () => {
   let pickedCards = [];
+  let discardedCards = 0;
 
   const pickCard = (card) => {
     pickedCards.push(card);
@@ -118,6 +168,16 @@ const getHandler = () => {
 
   const checkMatch = () => {
     return pickedCards[0].cardData.link === pickedCards[1].cardData.link
+  }
+
+  const checkWin = () => {
+    console.log('checking')
+    if (discardedCards === 12) win();
+  }
+
+  const win = () => {
+    alert('win');
+    // new game
   }
 
   const openCard = (card) => {
@@ -133,12 +193,10 @@ const getHandler = () => {
   const discardСards = () => {
     const [firstCard, secondCard] = pickedCards;
 
-    setTimeout(() => {
-      firstCard.style.display = 'none';
-      secondCard.style.display = 'none';
-    }, 500)
-
+    discardedCards += 2;
     pickedCards.length = 0;
+    animateDiscard(firstCard, secondCard)
+      .then(() => checkWin());
   }
 
   return (e) => {

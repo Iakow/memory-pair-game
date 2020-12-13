@@ -43,18 +43,7 @@ preloadImages();
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+/* newGame должна перенастраивать SETTING а не клепать новые элементы */
 
 
 
@@ -164,6 +153,10 @@ const animateDiscard = (...cards) => {
 
       if (opacity == 0) {
         clearInterval(interval);
+        cards.forEach(card => {
+          card.style.display = 'none';
+          card.style.opacity = '100%';
+        });
         resolve();
       }
     }, 20);
@@ -177,6 +170,7 @@ const animateDiscard = (...cards) => {
 
 const getHandler = () => {
   let pickedCards = [];
+
   let discardedCards = 0;
   let moves = 0;
 
@@ -211,24 +205,32 @@ const getHandler = () => {
   const openCard = (card) => {
     return animateFlip(0, 6, card);
   }
-
+/* должна быть возможность нажать на другую карту, пока эти закрываются, но не на одну из этих, т.е. нельзя анимировать карту, у которой угол в [0:180] */
   const closeCards = () => {
     const [firstCard, secondCard] = pickedCards;
 
-    animateFlip(500, 30, firstCard, secondCard);
-    pickedCards.length = 0;
-    moves++;
+    animateFlip(300, 10, firstCard, secondCard)
+      .then(() => {
+        pickedCards.length = 0;
+        moves++;
+
+      });
   }
 
   const discardСards = () => {
     const [firstCard, secondCard] = pickedCards;
-    discardedCards += 2;
-    pickedCards.length = 0;
     animateDiscard(firstCard, secondCard)
+      .then(() => {
+        /* здесь надо разблочивать не все карты, кроме анимируемых */
+        discardedCards += 2;
+        pickedCards.length = 0;
+
+      })
       .then(() => checkWin());
   }
 
   return (e) => {
+    /* как только pickedCards обнулен, карту можно пикать снова */
     if (e.target.className !== 'card') return;
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;

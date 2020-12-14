@@ -78,8 +78,6 @@ const newGame = () => {
   const container = document.querySelector('.container');
   container.innerHTML = '';
 
-  container.style.backgroundColor = 'blue'
-
   const fragment = document.createDocumentFragment();
 
   cardFaces.forEach((img, index) => {
@@ -202,7 +200,7 @@ const getHandler = () => {
       alert(`Congratulations!\n` +
         `Moves: ${moves}\n` +
         `Time: ${mins}min ${seconds}sec`);
-    }, 20)
+    }, 10)
 
     discardedCards = 0;
 

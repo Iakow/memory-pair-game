@@ -78,6 +78,8 @@ const newGame = () => {
   const container = document.querySelector('.container');
   container.innerHTML = '';
 
+  container.style.backgroundColor = 'red'
+
   const fragment = document.createDocumentFragment();
 
   cardFaces.forEach((img, index) => {

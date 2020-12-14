@@ -1,3 +1,5 @@
+'use strict'
+
 /* CACH HACK */
 const src = document.scripts[0].src;
 document.scripts[0].setAttribute('src', src + `?v=${new Date().toISOString()}`)
@@ -20,6 +22,7 @@ const images = [
   'img/mask15.png',
   'img/mask16.png'
 ];
+
 // must be css value
 const cardBack = `none`;
 
@@ -40,27 +43,25 @@ const preloadImages = () => {
 
 preloadImages();
 
-
-
-
-
 ///////////////////////////////// DOM ///////////////////////////////////////
+
+const newImgSelection = () => {
+  const randomImgSet = [...images].sort(() => 0.5 - Math.random()).slice(0, 6);
+
+  const shuffledImgSet = randomImgSet.concat(randomImgSet).sort(() => 0.5 - Math.random());
+
+  return shuffledImgSet;
+}
 /* newGame должна перенастраивать SETTING а не клепать новые элементы */
 
 const SETTING = new Map();
 
 let startTime;
 
-const newGame = () => {
-  const getImgSelection = () => {
-    const randomImgSet = [...images].sort(() => 0.5 - Math.random()).slice(0, 6);
+/* монтируем сразу в дом и в Мап как сейчас */
 
-    const shuffledImgSet = randomImgSet.concat(randomImgSet).sort(() => 0.5 - Math.random());
-
-    return shuffledImgSet;
-  }
-
-  cardFaces = getImgSelection();
+const mountCads = () => {
+  const cardFaces = newImgSelection();
 
   const createCard = () => {
     const cardPlace = document.createElement('div');
@@ -76,10 +77,9 @@ const newGame = () => {
   }
 
   const container = document.querySelector('.container');
-  container.innerHTML = '';
+  container.innerHTML = ''; //удалить
 
   const fragment = document.createDocumentFragment();
-
   cardFaces.forEach((img, index) => {
     const newCard = createCard(index);
 
@@ -87,12 +87,19 @@ const newGame = () => {
     SETTING.set(newCard.firstChild, `url("${img}")`);
   });
 
+
   container.appendChild(fragment);
 
   startTime = Date.now();
 }
 
-newGame();
+mountCads();
+
+const newGame = () => {
+  mountCads();
+};
+
+
 
 //////////////////////  ANIMATION ///////////////////////////////////////////
 
@@ -118,14 +125,17 @@ const animateFlip = (delay, freq, ...cards) => {
   }
 
   const animateFrame = () => {
-    angle += angleIncrement;
     cards.forEach(card => card.style.transform = `rotateY(${angle}deg)`);
+    angle += angleIncrement;
   }
 
   return new Promise((resolve, reject) => {
+    console.log(cards)
+
+    
     const goAnimate = () => {
       const interval = setInterval(() => {
-        cards.forEach(card => animateFrame(card));
+        animateFrame();
 
         if (Math.abs(angle) === 90) toggleBGimage();
 
@@ -140,12 +150,12 @@ const animateFlip = (delay, freq, ...cards) => {
   })
 }
 
-const animateDiscard = (...cards) => {
-  return new Promise((resolve, regect) => {
-    increment = -5;
-    opacity = 100;
+const animateDiscard = (delay, ...cards) => {
+  const increment = -5;
+  let opacity = 100;
 
-    const interval = setInterval(() => {
+  return new Promise((resolve, regect) => {
+    const goAnimate = setInterval(() => {
       opacity += increment;
 
       cards.forEach(card => {
@@ -153,7 +163,7 @@ const animateDiscard = (...cards) => {
       });
 
       if (opacity == 0) {
-        clearInterval(interval);
+        clearInterval(goAnimate);
 
         cards.forEach(card => {
           card.style.visibility = 'hidden';
@@ -163,17 +173,15 @@ const animateDiscard = (...cards) => {
         resolve();
       }
     }, 10);
+
+    delay ? setTimeout(goAnimate, delay) : goAnimate();
   })
 }
-
-
-
 ////////////////////  HANDLER  //////////////////////////////////////////
-
 
 const getHandler = () => {
   const pickedCards = [];
-  let discardedCards = 0;
+  const discardedCardsArr = [];
   let moves = 0;
 
   const pickCard = (card) => {
@@ -185,14 +193,12 @@ const getHandler = () => {
   }
 
   const checkWin = () => {
-    if (discardedCards === 12) win(); // возможно здесь проблема, т.к. нет 12
+    if (discardedCardsArr.length === 12) win(); // возможно здесь проблема, т.к. нет 12
   }
 
   const win = () => { // alert and newGame
     const endTime = Date.now();
-
     const time = new Date(endTime - startTime);
-
     const seconds = time.getSeconds();
     const mins = time.getMinutes();
 
@@ -200,11 +206,10 @@ const getHandler = () => {
       alert(`Congratulations!\n` +
         `Moves: ${moves}\n` +
         `Time: ${mins}min ${seconds}sec`);
-    }, 10)
 
-    discardedCards = 0;
-
-    newGame();
+      discardedCardsArr.length = 0;
+      newGame();
+    }, 20)
   }
 
   const openCard = (card) => {
@@ -213,28 +218,26 @@ const getHandler = () => {
 
   const closeCards = () => {
     const [firstCard, secondCard] = pickedCards;
+    moves++;
 
     animateFlip(300, 10, firstCard, secondCard)
       .then(() => {
         pickedCards.length = 0;
-        moves++;
       });
   }
 
   const discardСards = () => {
     const [firstCard, secondCard] = pickedCards;
+    moves++;
+    discardedCardsArr.push(...pickedCards);
+    pickedCards.length = 0;
 
-    animateDiscard(firstCard, secondCard)
-      .then(() => {
-        discardedCards += 2;
-        moves++;
-        pickedCards.length = 0;
-      })
-      .then(() => checkWin());
+    animateDiscard(100, firstCard, secondCard).then(() => checkWin());
   }
 
   return (e) => {
     if (e.target.className !== 'card') return;
+    if (discardedCardsArr.some(card => card === e.target)) return;
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;
 

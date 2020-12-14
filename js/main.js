@@ -94,9 +94,18 @@ const mountCads = () => {
 }
 
 mountCads();
+console.log(SETTING)
 
 const newGame = () => {
-  mountCads();
+  //mountCads();
+  const newImgSet = newImgSelection();
+
+  SETTING.forEach((value, card, map) => {
+    map.set(card, `url("${newImgSet.pop()}")`);
+    card.style.visibility = 'visible';
+    card.style.transform = `rotateY(0deg)`;
+    card.style.backgroundImage = cardBack;
+  })
 };
 
 
@@ -125,14 +134,11 @@ const animateFlip = (delay, freq, ...cards) => {
   }
 
   const animateFrame = () => {
-    cards.forEach(card => card.style.transform = `rotateY(${angle}deg)`);
     angle += angleIncrement;
+    cards.forEach(card => card.style.transform = `rotateY(${angle}deg)`);
   }
 
   return new Promise((resolve, reject) => {
-    console.log(cards)
-
-    
     const goAnimate = () => {
       const interval = setInterval(() => {
         animateFrame();
@@ -201,13 +207,14 @@ const getHandler = () => {
     const time = new Date(endTime - startTime);
     const seconds = time.getSeconds();
     const mins = time.getMinutes();
-
+    
     setTimeout(() => {
       alert(`Congratulations!\n` +
-        `Moves: ${moves}\n` +
-        `Time: ${mins}min ${seconds}sec`);
-
+      `Moves: ${moves}\n` +
+      `Time: ${mins}min ${seconds}sec`);
+      
       discardedCardsArr.length = 0;
+      moves = 0;
       newGame();
     }, 20)
   }
@@ -228,9 +235,11 @@ const getHandler = () => {
 
   const discardСards = () => {
     const [firstCard, secondCard] = pickedCards;
-    moves++;
+
     discardedCardsArr.push(...pickedCards);
     pickedCards.length = 0;
+
+    moves++;
 
     animateDiscard(100, firstCard, secondCard).then(() => checkWin());
   }

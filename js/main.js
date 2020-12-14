@@ -20,7 +20,7 @@ const images = [
   'img/mask15.png',
   'img/mask16.png'
 ];
-// must be css 
+// must be css value
 const cardBack = `none`;
 
 /* preload */
@@ -39,13 +39,13 @@ const preloadImages = () => {
 };
 
 preloadImages();
-////////////////////////////////////////////////////////////////////////
 
 
 
+
+
+///////////////////////////////// DOM ///////////////////////////////////////
 /* newGame должна перенастраивать SETTING а не клепать новые элементы */
-
-
 
 const SETTING = new Map();
 
@@ -103,9 +103,9 @@ const animateFlip = (delay, freq, ...cards) => {
     return +angle;
   }
 
-  let angle = getCardAngle(cards[0]); // мож чекнуть?
-  const direction = angle === 0 ? 1 : -1;
-  const angleIncrement = 5 * direction;
+  let angle = getCardAngle(cards[0]); // cards must have the same state
+  const rotateDirection = angle === 0 ? 1 : -1;
+  const angleIncrement = 5 * rotateDirection;
 
   const toggleBGimage = () => {
     cards.forEach((card) => {
@@ -117,19 +117,17 @@ const animateFlip = (delay, freq, ...cards) => {
     })
   }
 
-  return new Promise((resolve, reject) => {
-    const animateFrame = () => {
-      angle += angleIncrement;
-      cards.forEach(card => card.style.transform = `rotateY(${angle}deg)`);
-    }
+  const animateFrame = () => {
+    angle += angleIncrement;
+    cards.forEach(card => card.style.transform = `rotateY(${angle}deg)`);
+  }
 
+  return new Promise((resolve, reject) => {
     const goAnimate = () => {
       const interval = setInterval(() => {
         cards.forEach(card => animateFrame(card));
 
-        if (Math.abs(angle) === 90) {
-          toggleBGimage();
-        }
+        if (Math.abs(angle) === 90) toggleBGimage();
 
         if (Math.abs(angle) % 180 === 0) {
           clearInterval(interval);
@@ -149,17 +147,22 @@ const animateDiscard = (...cards) => {
 
     const interval = setInterval(() => {
       opacity += increment;
-      cards.forEach(card => card.style.opacity = `${opacity}%`);
+
+      cards.forEach(card => {
+        card.style.opacity = `${opacity}%`
+      });
 
       if (opacity == 0) {
         clearInterval(interval);
+
         cards.forEach(card => {
-          card.style.display = 'none';
+          card.style.visibility = 'hidden';
           card.style.opacity = '100%';
         });
+
         resolve();
       }
-    }, 20);
+    }, 10);
   })
 }
 
@@ -169,8 +172,7 @@ const animateDiscard = (...cards) => {
 
 
 const getHandler = () => {
-  let pickedCards = [];
-
+  const pickedCards = [];
   let discardedCards = 0;
   let moves = 0;
 
@@ -179,7 +181,6 @@ const getHandler = () => {
   }
 
   const checkMatch = () => {
-    /* надо сравнивать  */
     return pickedCards[0].style.backgroundImage === pickedCards[1].style.backgroundImage
   }
 
@@ -187,7 +188,7 @@ const getHandler = () => {
     if (discardedCards === 12) win(); // возможно здесь проблема, т.к. нет 12
   }
 
-  const win = () => {
+  const win = () => { // alert and newGame
     const endTime = Date.now();
 
     const time = new Date(endTime - startTime);
@@ -195,9 +196,13 @@ const getHandler = () => {
     const seconds = time.getSeconds();
     const mins = time.getMinutes();
 
-    alert(`Congratulations!\n` +
-      `Moves: ${moves}\n` +
-      `Time: ${mins}min ${seconds}sec`);
+    setTimeout(() => {
+      alert(`Congratulations!\n` +
+        `Moves: ${moves}\n` +
+        `Time: ${mins}min ${seconds}sec`);
+    }, 10)
+
+    discardedCards = 0;
 
     newGame();
   }
@@ -205,7 +210,7 @@ const getHandler = () => {
   const openCard = (card) => {
     return animateFlip(0, 6, card);
   }
-/* должна быть возможность нажать на другую карту, пока эти закрываются, но не на одну из этих, т.е. нельзя анимировать карту, у которой угол в [0:180] */
+
   const closeCards = () => {
     const [firstCard, secondCard] = pickedCards;
 
@@ -213,24 +218,22 @@ const getHandler = () => {
       .then(() => {
         pickedCards.length = 0;
         moves++;
-
       });
   }
 
   const discardСards = () => {
     const [firstCard, secondCard] = pickedCards;
+
     animateDiscard(firstCard, secondCard)
       .then(() => {
-        /* здесь надо разблочивать не все карты, кроме анимируемых */
         discardedCards += 2;
+        moves++;
         pickedCards.length = 0;
-
       })
       .then(() => checkWin());
   }
 
   return (e) => {
-    /* как только pickedCards обнулен, карту можно пикать снова */
     if (e.target.className !== 'card') return;
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;

@@ -200,7 +200,7 @@ const getHandler = () => {
       alert(`Congratulations!\n` +
         `Moves: ${moves}\n` +
         `Time: ${mins}min ${seconds}sec`);
-    }, 10)
+    }, 20)
 
     discardedCards = 0;
 

@@ -78,7 +78,7 @@ const newGame = () => {
   const container = document.querySelector('.container');
   container.innerHTML = '';
 
-  container.style.backgroundColor = 'green'
+  container.style.backgroundColor = 'blue'
 
   const fragment = document.createDocumentFragment();
 

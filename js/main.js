@@ -98,6 +98,7 @@ function setNewGame() {
       card.style.backgroundImage = CARD_BACK;
       card.style.visibility = 'visible';
       card.style.opacity = '100%';
+      card.style.boxShadow = '';
 
       return card;
     }
@@ -163,6 +164,11 @@ function animateDiscard(delay, ...cards) {
   const increment = -5;
   let opacity = 100;
 
+  /* -webkit-box-shadow: 0px 0px 48px 16px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4); 
+box-shadow: 0px 0px 48px 16px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4); */
+
+  cards.forEach((card) => card.style.boxShadow = "0px 0px 48px 16px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4)")
+
   return new Promise((resolve, regect) => {
     const goAnimate = setInterval(() => {
       opacity += increment;
@@ -181,7 +187,7 @@ function animateDiscard(delay, ...cards) {
 
         resolve();
       }
-    }, 10);
+    }, 40);
 
     delay ? setTimeout(goAnimate, delay) : goAnimate();
   })
@@ -254,6 +260,7 @@ function getHandler() {
 
   const discardСards = () => {
     const [firstCard, secondCard] = pickedCards;
+    
 
     discardedCards.push(...pickedCards);
     pickedCards.length = 0;

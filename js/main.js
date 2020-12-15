@@ -198,8 +198,11 @@ function getHandler() {
     return pickedCards[0].style.backgroundImage === pickedCards[1].style.backgroundImage
   }
 
+  const pickCard = (card) => {
+    pickedCards.push(card);
+  }
+
   const checkWin = () => {
-    console.log('wtf')
     const time = new Date(Date.now() - startTime);
     const currentScore = Math.round(100000000 / (moves * time));
 
@@ -220,7 +223,6 @@ function getHandler() {
 
 
     setTimeout(() => {
-      console.log('set new')
       alert([
         pastBestScore ? `Best result: ${pastBestScore}` : '',
         '',
@@ -278,16 +280,17 @@ function getHandler() {
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;
 
-    pickedCards.push(e.target);
+    //pickedCards.push(e.target);
+    pickCard(e.target);
 
     if (pickedCards.length === 1) {
       openCard(e.target)
         .then(() => {
           if (discardedCards.length === 10) {
-            const pairCard = findPair(e.target);
+            const lastCard = findPair(e.target);
+            pickCard(lastCard);
 
-            pickedCards.push(pairCard);
-            openCard(pairCard)
+            openCard(lastCard)
               .then(() => discardСards())
               .then(() => checkWin());
           } else {

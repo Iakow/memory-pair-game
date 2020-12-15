@@ -268,7 +268,7 @@ function getHandler() {
     if (discardedCards.some(card => card === e.target)) return;
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;
-    window.navigator.vibrate(10);
+    window.navigator.vibrate(100);
 
     pickedCards.push(e.target);
 

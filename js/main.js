@@ -161,14 +161,14 @@ function animateFlip(delay, freq, ...cards) {
 }
 
 function animateDiscard(delay, ...cards) {
-  const increment = -2;
+  const increment = -5;
   let opacity = 100;
   let shadowSpread = 0;
 
   return new Promise((resolve, regect) => {
     const goAnimate = setInterval(() => {
       opacity += increment;
-      shadowSpread -= increment*5;
+      shadowSpread -= increment * 2;
 
       cards.forEach(card => {
         card.style.opacity = `${opacity}%`
@@ -185,7 +185,7 @@ function animateDiscard(delay, ...cards) {
 
         resolve();
       }
-    }, 8);
+    }, 20);
 
     delay ? setTimeout(goAnimate, delay) : goAnimate();
   })
@@ -207,7 +207,7 @@ function getHandler() {
     if (discardedCards.length === 12) {
       const time = new Date(Date.now() - startTime);
       const currentScore = Math.round(100000000 / (moves * time));
-      
+
       let comment;
       let pastBestScore = bestScore;
 
@@ -258,7 +258,7 @@ function getHandler() {
 
   const discardСards = () => {
     const [firstCard, secondCard] = pickedCards;
-    
+
 
     discardedCards.push(...pickedCards);
     pickedCards.length = 0;
@@ -277,9 +277,16 @@ function getHandler() {
 
     pickedCards.push(e.target);
 
-    if (pickedCards.length === 1) { // а если discardedCards === 10, надо найти и открыть вторую
-      openCard(pickedCards[0]);
-      return;
+    if (pickedCards.length === 1) { // а если discardedCards === 8, надо найти и открыть вторую
+      openCard(pickedCards[0])
+        .then(() => {
+          if (discardedCards.length === 10) {
+            /* как отобрать такую же карту? */
+
+          } else {
+            return;
+          }
+        });
     }
 
     if (pickedCards.length === 2) {

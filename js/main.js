@@ -199,43 +199,45 @@ function getHandler() {
   }
 
   const checkWin = () => {
-    if (discardedCards.length === 12) {
-      const time = new Date(Date.now() - startTime);
-      const currentScore = Math.round(100000000 / (moves * time));
+    console.log('wtf')
+    const time = new Date(Date.now() - startTime);
+    const currentScore = Math.round(100000000 / (moves * time));
 
-      let comment;
-      let pastBestScore = bestScore;
+    let comment;
+    let pastBestScore = bestScore;
 
-      if (!bestScore) {
-        bestScore = currentScore;
-        comment = 'Congratulations!'
+    if (!bestScore) {
+      bestScore = currentScore;
+      comment = 'Congratulations!'
+    } else {
+      if (bestScore > currentScore) {
+        comment = 'You can better...'
       } else {
-        if (bestScore > currentScore) {
-          comment = 'You can better...'
-        } else {
-          comment = 'This is your new record!!!' /////////////
-          bestScore = currentScore;
-        }
+        comment = 'This is your new record!!!' /////////////
+        bestScore = currentScore;
       }
+    }
 
-      setTimeout(() => {
-        alert([
-          pastBestScore ? `Best result: ${pastBestScore}` : '',
-          '',
-          comment,
-          `Moves: ${moves}`,
-          `Time: ${time.getMinutes()}min ${time.getSeconds()}sec`,
-          `Score: ${currentScore}`
-        ].join('\n'));
 
-        discardedCards.length = 0;
-        moves = 0;
+    setTimeout(() => {
+      console.log('set new')
+      alert([
+        pastBestScore ? `Best result: ${pastBestScore}` : '',
+        '',
+        comment,
+        `Moves: ${moves}`,
+        `Time: ${time.getMinutes()}min ${time.getSeconds()}sec`,
+        `Score: ${currentScore}`
+      ].join('\n'));
 
-        setNewGame();
-        startTime = Date.now();
-      }, 20);
-    };
+      discardedCards.length = 0;
+      moves = 0;
+
+      setNewGame();
+      startTime = Date.now();
+    }, 20);
   }
+
 
   const openCard = (card) => {
     return animateFlip(0, 6, card);
@@ -249,6 +251,13 @@ function getHandler() {
       .then(() => {
         pickedCards.length = 0;
       });
+  }
+
+  const findPair = (card) => {
+    return Array.from(MAPPING)
+      .filter((item) => (
+        item[0] !== card && item[1] === card.style.backgroundImage
+      ))[0][0];
   }
 
   const discardСards = () => {
@@ -271,20 +280,16 @@ function getHandler() {
 
     pickedCards.push(e.target);
 
-    if (pickedCards.length === 1) { // а если discardedCards === 8, надо найти и открыть вторую
-      openCard(pickedCards[0])
+    if (pickedCards.length === 1) {
+      openCard(e.target)
         .then(() => {
           if (discardedCards.length === 10) {
-            const elem = Array.from(MAPPING)
-              .filter((item) => (
-                item[0] !== e.target && item[1] === e.target.style.backgroundImage
-              ))[0][0];
-              
-            pickedCards.push(elem);
-            openCard(elem)
-              .then(() => checkMatch()
-                ? discardСards().then(() => checkWin())
-                : closeCards());
+            const pairCard = findPair(e.target);
+
+            pickedCards.push(pairCard);
+            openCard(pairCard)
+              .then(() => discardСards())
+              .then(() => checkWin());
           } else {
             return;
           }
@@ -292,10 +297,7 @@ function getHandler() {
     }
 
     if (pickedCards.length === 2) {
-      openCard(pickedCards[1])
-        .then(() => checkMatch()
-          ? discardСards().then(() => checkWin())
-          : closeCards());
+      openCard(e.target).then(() => checkMatch() ? discardСards() : closeCards());
     }
   }
 }

@@ -178,10 +178,10 @@ function animateDiscard(delay, ...cards) {
       if (opacity == 0) {
         clearInterval(goAnimate);
 
-        cards.forEach(card => {
+        /* cards.forEach(card => {
           card.style.visibility = 'hidden';
           card.style.opacity = '100%';
-        });
+        }); */
 
         resolve();
       }
@@ -265,7 +265,7 @@ function getHandler() {
 
     moves++;
     window.navigator.vibrate(200);
-    return animateDiscard(100, firstCard, secondCard);
+    return animateDiscard(200, firstCard, secondCard);
   }
 
   return (e) => {

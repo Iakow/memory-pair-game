@@ -161,11 +161,8 @@ function animateFlip(delay, freq, ...cards) {
 }
 
 function animateDiscard(delay, ...cards) {
-  const increment = -5;
+  const increment = -1;
   let opacity = 100;
-
-  /* -webkit-box-shadow: 0px 0px 48px 16px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4); 
-box-shadow: 0px 0px 48px 16px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4); */
 
   cards.forEach((card) => card.style.boxShadow = "0px 0px 48px 16px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4)")
 
@@ -187,7 +184,7 @@ box-shadow: 0px 0px 48px 16px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,
 
         resolve();
       }
-    }, 40);
+    }, 8);
 
     delay ? setTimeout(goAnimate, delay) : goAnimate();
   })
@@ -279,7 +276,7 @@ function getHandler() {
 
     pickedCards.push(e.target);
 
-    if (pickedCards.length === 1) {
+    if (pickedCards.length === 1) { // а если discardedCards === 10, надо найти и открыть вторую
       openCard(pickedCards[0]);
       return;
     }

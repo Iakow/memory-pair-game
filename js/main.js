@@ -96,7 +96,8 @@ function setNewGame() {
     function resetAnimatedCardProps(card) {
       card.style.transform = `rotateY(0deg)`;
       card.style.backgroundImage = CARD_BACK;
-      card.style.visibility = 'visible';
+      // card.style.visibility = 'visible';
+      card.style.display = 'block';
       card.style.opacity = '100%';
       card.style.boxShadow = '';
 
@@ -113,7 +114,6 @@ function setNewGame() {
 }
 
 setNewGame();
-
 //////////////////////  ANIMATION ///////////////////////////////////////////
 
 function animateFlip(delay, freq, ...cards) {
@@ -176,6 +176,7 @@ function animateDiscard(delay, ...cards) {
       });
 
       if (opacity == 0) {
+        cards.forEach(card => card.style.display = "none");
         clearInterval(goAnimate);
         resolve();
       }
@@ -274,13 +275,16 @@ function getHandler() {
       openCard(pickedCards[0])
         .then(() => {
           if (discardedCards.length === 10) {
-            /* как отобрать такую же карту? 
-               в сете? в доме?
-            */
-           const elem = [...document.querySelectorAll('.card')]
-            .filter((card) => card !== e.target);
-            console.log(elem)
-
+            const elem = Array.from(MAPPING)
+              .filter((item) => (
+                item[0] !== e.target && item[1] === e.target.style.backgroundImage
+              ))[0][0];
+              
+            pickedCards.push(elem);
+            openCard(elem)
+              .then(() => checkMatch()
+                ? discardСards().then(() => checkWin())
+                : closeCards());
           } else {
             return;
           }

@@ -52,7 +52,10 @@ function setNewGame() {
     setNewMaping();
 
     setTimeout(() => {
-      alert('Время разбиратся в масках')
+      alert([
+        'It\'s time to learn to distinguish between masks!',
+        'Well you know what to do... :)'
+      ].join('\n\n'))
     }, 600);
   }
 
@@ -187,39 +190,56 @@ function animateDiscard(delay, ...cards) {
 
 function getHandler() {
   const pickedCards = [];
-  const discardedCardsArr = [];
+  const discardedCards = [];
   let moves = 0;
   let startTime = Date.now();
-
-  const pickCard = (card) => {
-    pickedCards.push(card);
-  }
+  let bestScore = 0;
 
   const checkMatch = () => {
     return pickedCards[0].style.backgroundImage === pickedCards[1].style.backgroundImage
   }
 
   const checkWin = () => {
-    if (discardedCardsArr.length === 12) win();
-  }
-
-  const win = () => {
-    const endTime = Date.now();
-    const time = new Date(endTime - startTime);
-    /* const seconds = time.getSeconds();
-    const mins = time.getMinutes(); */
-    
-    setTimeout(() => {
-      alert(`Congratulations!\n` +
-      `Moves: ${moves}\n` +
-      `Time: ${time.getMinutes()}min ${time.getSeconds()}sec`);
+    if (discardedCards.length === 12) {
+      const time = new Date(Date.now() - startTime);
+      const currentScore = Math.round(100000000 / (moves * time));
       
-      discardedCardsArr.length = 0;
-      moves = 0;
-      setNewGame();
-      startTime = Date.now();
-    }, 20);
+      /* если очков 0, то поздравляем и записываем.
+         если их меньше - ты можешь лучше
+         если больше - это твой рекорд!!!
+      */
+      let comment;
+      let pastBestScore = bestScore;
 
+      if (!bestScore) {
+        bestScore = currentScore;
+        comment = 'Congratulations!'
+      } else {
+        if (bestScore > currentScore) {
+          comment = 'You can better...'
+        } else {
+          comment = 'This is your new record!!!' /////////////
+          bestScore = currentScore;
+        }
+      }
+
+      setTimeout(() => {
+        alert([
+          pastBestScore ? `Best results: ${pastBestScore}` : '',
+          '',
+          comment,
+          `Moves: ${moves}`,
+          `Time: ${time.getMinutes()}min ${time.getSeconds()}sec`,
+          `Score: ${currentScore}`
+        ].join('\n'));
+
+        discardedCards.length = 0;
+        moves = 0;
+
+        setNewGame();
+        startTime = Date.now();
+      }, 20);
+    };
   }
 
   const openCard = (card) => {
@@ -239,21 +259,21 @@ function getHandler() {
   const discardСards = () => {
     const [firstCard, secondCard] = pickedCards;
 
-    discardedCardsArr.push(...pickedCards);
+    discardedCards.push(...pickedCards);
     pickedCards.length = 0;
 
     moves++;
 
-    animateDiscard(100, firstCard, secondCard).then(() => checkWin());
+    return animateDiscard(100, firstCard, secondCard);
   }
 
   return (e) => {
     if (e.target.className !== 'card') return;
-    if (discardedCardsArr.some(card => card === e.target)) return;
+    if (discardedCards.some(card => card === e.target)) return;
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;
 
-    pickCard(e.target);
+    pickedCards.push(e.target);
 
     if (pickedCards.length === 1) {
       openCard(pickedCards[0]);
@@ -262,7 +282,9 @@ function getHandler() {
 
     if (pickedCards.length === 2) {
       openCard(pickedCards[1])
-        .then(() => checkMatch() ? discardСards() : closeCards());
+        .then(() => checkMatch()
+          ? discardСards().then(() => checkWin())
+          : closeCards());
     }
   }
 }

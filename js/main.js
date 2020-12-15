@@ -204,10 +204,6 @@ function getHandler() {
       const time = new Date(Date.now() - startTime);
       const currentScore = Math.round(100000000 / (moves * time));
       
-      /* если очков 0, то поздравляем и записываем.
-         если их меньше - ты можешь лучше
-         если больше - это твой рекорд!!!
-      */
       let comment;
       let pastBestScore = bestScore;
 
@@ -225,7 +221,7 @@ function getHandler() {
 
       setTimeout(() => {
         alert([
-          pastBestScore ? `Best results: ${pastBestScore}` : '',
+          pastBestScore ? `Best result: ${pastBestScore}` : '',
           '',
           comment,
           `Moves: ${moves}`,
@@ -272,6 +268,7 @@ function getHandler() {
     if (discardedCards.some(card => card === e.target)) return;
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;
+    window.navigator.vibrate(10);
 
     pickedCards.push(e.target);
 

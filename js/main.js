@@ -161,17 +161,18 @@ function animateFlip(delay, freq, ...cards) {
 }
 
 function animateDiscard(delay, ...cards) {
-  const increment = -1;
+  const increment = -2;
   let opacity = 100;
-
-  cards.forEach((card) => card.style.boxShadow = "0px 0px 48px 16px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4)")
+  let shadowSpread = 0;
 
   return new Promise((resolve, regect) => {
     const goAnimate = setInterval(() => {
       opacity += increment;
+      shadowSpread -= increment*5;
 
       cards.forEach(card => {
         card.style.opacity = `${opacity}%`
+        card.style.boxShadow = `0px 0px 48px ${shadowSpread}px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4)`;
       });
 
       if (opacity == 0) {
@@ -263,7 +264,7 @@ function getHandler() {
     pickedCards.length = 0;
 
     moves++;
-
+    window.navigator.vibrate(200);
     return animateDiscard(100, firstCard, secondCard);
   }
 

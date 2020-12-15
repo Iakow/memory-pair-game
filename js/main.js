@@ -177,12 +177,6 @@ function animateDiscard(delay, ...cards) {
 
       if (opacity == 0) {
         clearInterval(goAnimate);
-
-        /* cards.forEach(card => {
-          card.style.visibility = 'hidden';
-          card.style.opacity = '100%';
-        }); */
-
         resolve();
       }
     }, 20);
@@ -264,7 +258,7 @@ function getHandler() {
     pickedCards.length = 0;
 
     moves++;
-    window.navigator.vibrate(200);
+    window.navigator.vibrate(100);
     return animateDiscard(200, firstCard, secondCard);
   }
 
@@ -273,7 +267,6 @@ function getHandler() {
     if (discardedCards.some(card => card === e.target)) return;
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;
-    window.navigator.vibrate(50);
 
     pickedCards.push(e.target);
 
@@ -281,7 +274,12 @@ function getHandler() {
       openCard(pickedCards[0])
         .then(() => {
           if (discardedCards.length === 10) {
-            /* как отобрать такую же карту? */
+            /* как отобрать такую же карту? 
+               в сете? в доме?
+            */
+           const elem = [...document.querySelectorAll('.card')]
+            .filter((card) => card !== e.target);
+            console.log(elem)
 
           } else {
             return;

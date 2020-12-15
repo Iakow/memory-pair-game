@@ -1,11 +1,12 @@
-'use strict'
+'use strict';
 
-/* CACH HACK */
-const src = document.scripts[0].src;
-document.scripts[0].setAttribute('src', src + `?v=${new Date().toISOString()}`)
+(function disableCache() {
+  const thisScript = [...document.scripts].find((script) => script.src.match(/main.js/));
+  thisScript.src += `?v=${new Date().toISOString()}`;
+}());
 
 /* All the images */
-const images = [
+const IMAGES = [
   'img/mask1.png',
   'img/mask2.png',
   'img/mask3.png',
@@ -24,95 +25,94 @@ const images = [
 ];
 
 // must be css value
-const cardBack = `none`;
+const CARD_BACK = `none`;
 
 /* preload */
-const preloadImages = () => {
+(function preloadImages() {
   const addLink = (href) => {
     const link = document.createElement('link');
-
-    link.setAttribute('rel', 'preload');
-    link.setAttribute('href', href);
-    link.setAttribute('as', 'image');
+    link.rel = 'preload';
+    link.href = href;
+    link.as = 'image';
 
     document.head.appendChild(link);
   }
 
-  images.forEach(item => addLink(item));
-};
+  IMAGES.forEach(item => addLink(item));
+}());
 
-preloadImages();
+const MAPPING = new Map();
 
-///////////////////////////////// DOM ///////////////////////////////////////
 
-const newImgSelection = () => {
-  const randomImgSet = [...images].sort(() => 0.5 - Math.random()).slice(0, 6);
+function setNewGame() {
+  if (MAPPING.size) {
+    setNewMaping();
+  } else {
+    mountGame();
+    setNewMaping();
 
-  const shuffledImgSet = randomImgSet.concat(randomImgSet).sort(() => 0.5 - Math.random());
-
-  return shuffledImgSet;
-}
-/* newGame должна перенастраивать SETTING а не клепать новые элементы */
-
-const SETTING = new Map();
-
-let startTime;
-
-/* монтируем сразу в дом и в Мап как сейчас */
-
-const mountCads = () => {
-  const cardFaces = newImgSelection();
-
-  const createCard = () => {
-    const cardPlace = document.createElement('div');
-    cardPlace.className = 'cardPlace';
-
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.style.transform = `rotateY(0deg)`;
-    card.style.backgroundImage = cardBack;
-
-    cardPlace.appendChild(card);
-    return cardPlace;
+    setTimeout(() => {
+      alert('Время разбиратся в масках')
+    }, 600);
   }
 
-  const container = document.querySelector('.container');
-  container.innerHTML = ''; //удалить
+  function mountGame() {
+    function createCard() {
+      const cardPlace = document.createElement('div');
+      cardPlace.className = 'cardPlace';
 
-  const fragment = document.createDocumentFragment();
-  cardFaces.forEach((img, index) => {
-    const newCard = createCard(index);
+      const card = document.createElement('div');
+      card.className = 'card';
 
-    fragment.appendChild(newCard);
-    SETTING.set(newCard.firstChild, `url("${img}")`);
-  });
+      cardPlace.appendChild(card);
+      return cardPlace;
+    }
 
+    const mountPoint = document.querySelector('.container');
+    const fragment = document.createDocumentFragment();
 
-  container.appendChild(fragment);
+    for (let i = 1; i <= 12; i++) {
+      const newCard = createCard();
 
-  startTime = Date.now();
+      fragment.appendChild(newCard);
+      MAPPING.set(newCard.firstChild, null);
+    }
+
+    mountPoint.appendChild(fragment);
+  }
+
+  function setNewMaping() {
+    function getImgSelection() {
+      const randomImgSet = [...IMAGES].sort(() => 0.5 - Math.random()).slice(0, 6);
+
+      const shuffledImgSet = randomImgSet.concat(randomImgSet).sort(() => 0.5 - Math.random());
+
+      return shuffledImgSet;
+    }
+
+    function resetAnimatedCardProps(card) {
+      card.style.transform = `rotateY(0deg)`;
+      card.style.backgroundImage = CARD_BACK;
+      card.style.visibility = 'visible';
+      card.style.opacity = '100%';
+
+      return card;
+    }
+
+    const newImgSet = getImgSelection();
+
+    MAPPING.forEach((value, card, map) => {
+      map.set(card, `url("${newImgSet.pop()}")`);
+      resetAnimatedCardProps(card);
+    })
+  }
 }
 
-mountCads();
-console.log(SETTING)
-
-const newGame = () => {
-  //mountCads();
-  const newImgSet = newImgSelection();
-
-  SETTING.forEach((value, card, map) => {
-    map.set(card, `url("${newImgSet.pop()}")`);
-    card.style.visibility = 'visible';
-    card.style.transform = `rotateY(0deg)`;
-    card.style.backgroundImage = cardBack;
-  })
-};
-
-
+setNewGame();
 
 //////////////////////  ANIMATION ///////////////////////////////////////////
 
-const animateFlip = (delay, freq, ...cards) => {
+function animateFlip(delay, freq, ...cards) {
   const getCardAngle = (card) => {
     const transformStr = card.style.transform;
     const angle = transformStr.split('(')[1].split('deg')[0];
@@ -125,10 +125,10 @@ const animateFlip = (delay, freq, ...cards) => {
 
   const toggleBGimage = () => {
     cards.forEach((card) => {
-      if (card.style.backgroundImage === cardBack) {
-        card.style.backgroundImage = SETTING.get(card);
+      if (card.style.backgroundImage === CARD_BACK) {
+        card.style.backgroundImage = MAPPING.get(card);
       } else {
-        card.style.backgroundImage = cardBack;
+        card.style.backgroundImage = CARD_BACK;
       }
     })
   }
@@ -156,7 +156,7 @@ const animateFlip = (delay, freq, ...cards) => {
   })
 }
 
-const animateDiscard = (delay, ...cards) => {
+function animateDiscard(delay, ...cards) {
   const increment = -5;
   let opacity = 100;
 
@@ -185,10 +185,11 @@ const animateDiscard = (delay, ...cards) => {
 }
 ////////////////////  HANDLER  //////////////////////////////////////////
 
-const getHandler = () => {
+function getHandler() {
   const pickedCards = [];
   const discardedCardsArr = [];
   let moves = 0;
+  let startTime = Date.now();
 
   const pickCard = (card) => {
     pickedCards.push(card);
@@ -199,24 +200,26 @@ const getHandler = () => {
   }
 
   const checkWin = () => {
-    if (discardedCardsArr.length === 12) win(); // возможно здесь проблема, т.к. нет 12
+    if (discardedCardsArr.length === 12) win();
   }
 
-  const win = () => { // alert and newGame
+  const win = () => {
     const endTime = Date.now();
     const time = new Date(endTime - startTime);
-    const seconds = time.getSeconds();
-    const mins = time.getMinutes();
+    /* const seconds = time.getSeconds();
+    const mins = time.getMinutes(); */
     
     setTimeout(() => {
       alert(`Congratulations!\n` +
       `Moves: ${moves}\n` +
-      `Time: ${mins}min ${seconds}sec`);
+      `Time: ${time.getMinutes()}min ${time.getSeconds()}sec`);
       
       discardedCardsArr.length = 0;
       moves = 0;
-      newGame();
-    }, 20)
+      setNewGame();
+      startTime = Date.now();
+    }, 20);
+
   }
 
   const openCard = (card) => {

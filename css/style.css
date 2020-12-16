@@ -1,5 +1,4 @@
 @media (max-aspect-ratio: 4/1) {
-  /* горизонталь */
   :root {
     --columns: 4;
     --rows: 3;
@@ -13,7 +12,6 @@
 }
 
 @media (max-aspect-ratio: 9/10) {
-  /* вертикаль */
   :root {
     --columns: 3;
     --rows: 4;
@@ -32,7 +30,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: rgba(41, 41, 41, 1);
+  background-color: rgb(41, 41, 41);
 }
 
 .container {
@@ -45,10 +43,8 @@ body {
 .cardPlace {
   position: relative;
   perspective: 2000px;
-  /* background-color: rgb(228, 228, 228); */
   border: 1px solid rgba(0, 0, 0, 0.19);
   border-radius: 8px;
-  box-sizing: border-box;
 }
 
 .card {
@@ -58,18 +54,9 @@ body {
   height: 100%;
   width: 100%;
   border-radius: 10px;
-  /* border: 3px solid rgb(112, 110, 73); */
-  box-sizing: border-box;
   box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.3), 0px 3px 28px 0px rgba(0,0,0,0.21);
-  /* box-shadow: 0px 11px 15px 0px rgba(0, 0, 0, 0.2), 0px 9px 46px 0px rgba(0, 0, 0, 0.12), 0px 24px 38px 0px rgba(0, 0, 0, 0.14); */
-  /* 0px 11px 15px 0px rgba(0, 0, 0, 0.2)
-  box-shadow: 0px 9px 46px 0px rgba(0, 0, 0, 0.12);
-  box-shadow: 0px 24px 38px 0px rgba(0, 0, 0, 0.14); */
 }
 
 .card:hover {
   cursor: pointer;
 }
-
-/* 9 = 3 10 = 4 24 = 10 */
-/*  */

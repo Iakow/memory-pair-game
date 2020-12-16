@@ -47,7 +47,6 @@ function setNewGame() {
   } else {
     mountGame();
     setNewMaping();
-
     setTimeout(() => {
       alert([
         'It\'s time to learn to distinguish between masks!',
@@ -63,8 +62,8 @@ function setNewGame() {
 
       const card = document.createElement('div');
       card.className = 'card';
-
       cardPlace.appendChild(card);
+
       return cardPlace;
     }
 
@@ -87,9 +86,7 @@ function setNewGame() {
         .sort(() => 0.5 - Math.random())
         .slice(0, GAME_SIZE / 2);
 
-      const shuffledDoubleSet = [...randomImgSet, ...randomImgSet].sort(() => 0.5 - Math.random());
-
-      return shuffledDoubleSet;
+      return [...randomImgSet, ...randomImgSet].sort(() => 0.5 - Math.random());
     }
 
     function resetAnimatedProps(card) {
@@ -118,7 +115,7 @@ function animateFlip(delay, freq, ...cards) {
     return +angle;
   }
 
-  let angle = getCardAngle(cards[0]); // cards must have the same state
+  let angle = getCardAngle(cards[0]);
   const rotateDirection = angle === 0 ? 1 : -1;
   const angleIncrement = 5 * rotateDirection;
 
@@ -186,18 +183,14 @@ function animateDiscard(delay, ...cards) {
 }
 
 function getHandler() {
-  const pickedCards = [];
+  const openedCards = [];
   const discardedCards = [];
   let moves = 0;
   let startTime = Date.now();
   let bestScore = 0;
 
   function checkMatch() {
-    return pickedCards[0].style.backgroundImage === pickedCards[1].style.backgroundImage
-  }
-
-  function pickCard(card) {
-    pickedCards.push(card);
+    return openedCards[0].style.backgroundImage === openedCards[1].style.backgroundImage
   }
 
   function win() {
@@ -219,7 +212,6 @@ function getHandler() {
       }
     }
 
-
     setTimeout(() => {
       alert([
         pastBestScore ? `Best result: ${pastBestScore}` : '',
@@ -239,17 +231,16 @@ function getHandler() {
   }
 
   function openCard(card) {
+    openedCards.push(card);
     return animateFlip(0, 6, card);
   }
 
   function closeCards() {
-    const [firstCard, secondCard] = pickedCards;
+    const [firstCard, secondCard] = openedCards;
     moves++;
 
     animateFlip(300, 10, firstCard, secondCard)
-      .then(() => {
-        pickedCards.length = 0;
-      });
+      .then(() => openedCards.length = 0);
   }
 
   function findPair(card) {
@@ -260,46 +251,31 @@ function getHandler() {
   }
 
   function discardСards() {
-    const [firstCard, secondCard] = pickedCards;
+    const [firstCard, secondCard] = openedCards;
 
-
-    discardedCards.push(...pickedCards);
-    pickedCards.length = 0;
+    discardedCards.push(...openedCards);
+    openedCards.length = 0;
 
     moves++;
     window.navigator.vibrate(100);
     return animateDiscard(200, firstCard, secondCard);
   }
 
-  function openPairCard(currentCard) {
-    const lastCard = findPair(currentCard);
-    pickCard(lastCard);
-
-    return openCard(lastCard);
-  }
-
   return function handler(e) {
     if (e.target.className !== 'card') return;
     if (discardedCards.some(card => card === e.target)) return;
-    if (pickedCards.some((card) => card === e.target)) return;
-    if (pickedCards.length === 2) return;
+    if (openedCards.some((card) => card === e.target)) return;
+    if (openedCards.length === 2) return;
 
-    pickCard(e.target);
-
-    if (pickedCards.length === 1) {
-      openCard(e.target)
-        .then(() => {
-          if (discardedCards.length === 10) {
-            openPairCard(e.target)
-              .then(() => discardСards())
-              .then(() => win());
-          } else {
-            return;
-          }
-        });
-    }
-
-    if (pickedCards.length === 2) {
+    if (openedCards.length === 0) {
+      openCard(e.target).then(() => {
+        if (discardedCards.length === (GAME_SIZE - 2)) {
+          openCard(findPair(e.target))
+            .then(() => discardСards())
+            .then(() => win());
+        }
+      });
+    } else if (openedCards.length === 1) {
       openCard(e.target).then(() => checkMatch() ? discardСards() : closeCards());
     }
   }

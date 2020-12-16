@@ -92,13 +92,10 @@ function setNewGame() {
       return shuffledDoubleSet;
     }
 
-    function resetAnimatedCardProps(card) { // blocking css influence && prepare
+    function resetAnimatedProps(card) {
       card.style.transform = `rotateY(0deg)`;
       card.style.backgroundImage = CARD_BACK;
-
-      card.style.opacity = '100%';
-      card.style.boxShadow = '';
-      card.style.display = 'block';
+      card.style.display = '';
 
       return card;
     }
@@ -107,7 +104,7 @@ function setNewGame() {
 
     MAPPING.forEach((value, card, map) => {
       map.set(card, `url("${newImgSet.pop()}")`);
-      resetAnimatedCardProps(card);
+      resetAnimatedProps(card);
     })
   }
 }
@@ -174,7 +171,11 @@ function animateDiscard(delay, ...cards) {
       });
 
       if (opacity == 0) {
-        cards.forEach(card => card.style.display = "none");
+        cards.forEach(card => {
+          card.style.display = "none";
+          card.style.opacity = '';
+          card.style.boxShadow = '';
+        });
         clearInterval(goAnimate);
         resolve();
       }
@@ -200,7 +201,7 @@ function getHandler() {
     pickedCards.push(card);
   }
 
-  function checkWin() {
+  function win() {
     const time = new Date(Date.now() - startTime);
     const currentScore = Math.round(100000000 / (moves * time));
 
@@ -279,7 +280,10 @@ function getHandler() {
     if (pickedCards.length === 2) return;
 
     pickCard(e.target);
-
+    /* 
+        Отброшено 10 карт? - ясно что делать полностью.
+        Если нет, то обычная роцедура.
+    */
     if (pickedCards.length === 1) {
       openCard(e.target)
         .then(() => {
@@ -289,7 +293,7 @@ function getHandler() {
 
             openCard(lastCard)
               .then(() => discardСards())
-              .then(() => checkWin());
+              .then(() => win());
           } else {
             return;
           }

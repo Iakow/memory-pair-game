@@ -184,7 +184,6 @@ function animateDiscard(delay, ...cards) {
     delay ? setTimeout(goAnimate, delay) : goAnimate();
   })
 }
-////////////////////  HANDLER  //////////////////////////////////////////
 
 function getHandler() {
   const pickedCards = [];
@@ -215,7 +214,7 @@ function getHandler() {
       if (bestScore > currentScore) {
         comment = 'You can better...'
       } else {
-        comment = 'This is your new record!!!' /////////////
+        comment = 'This is your new record!!!';
         bestScore = currentScore;
       }
     }
@@ -238,7 +237,6 @@ function getHandler() {
       startTime = Date.now();
     }, 20);
   }
-
 
   function openCard(card) {
     return animateFlip(0, 6, card);
@@ -273,6 +271,13 @@ function getHandler() {
     return animateDiscard(200, firstCard, secondCard);
   }
 
+  function openPairCard(currentCard) {
+    const lastCard = findPair(currentCard);
+    pickCard(lastCard);
+
+    return openCard(lastCard);
+  }
+
   return function handler(e) {
     if (e.target.className !== 'card') return;
     if (discardedCards.some(card => card === e.target)) return;
@@ -280,18 +285,12 @@ function getHandler() {
     if (pickedCards.length === 2) return;
 
     pickCard(e.target);
-    /* 
-        Отброшено 10 карт? - ясно что делать полностью.
-        Если нет, то обычная роцедура.
-    */
+
     if (pickedCards.length === 1) {
       openCard(e.target)
         .then(() => {
           if (discardedCards.length === 10) {
-            const lastCard = findPair(e.target);
-            pickCard(lastCard);
-
-            openCard(lastCard)
+            openPairCard(e.target)
               .then(() => discardСards())
               .then(() => win());
           } else {

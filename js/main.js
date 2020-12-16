@@ -261,22 +261,22 @@ function getHandler() {
     return animateDiscard(200, firstCard, secondCard);
   }
 
-  return function handler(e) {
-    if (e.target.className !== 'card') return;
-    if (discardedCards.some(card => card === e.target)) return;
-    if (openedCards.some((card) => card === e.target)) return;
+  return function handler({target}) {
+    if (target.className !== 'card') return;
+    if (discardedCards.some(card => card === target)) return;
+    if (openedCards.some((card) => card === target)) return;
     if (openedCards.length === 2) return;
 
     if (openedCards.length === 0) {
-      openCard(e.target).then(() => {
+      openCard(target).then(() => {
         if (discardedCards.length === (GAME_SIZE - 2)) {
-          openCard(findPair(e.target))
+          openCard(findPair(target))
             .then(() => discardСards())
             .then(() => win());
         }
       });
     } else if (openedCards.length === 1) {
-      openCard(e.target).then(() => checkMatch() ? discardСards() : closeCards());
+      openCard(target).then(() => checkMatch() ? discardСards() : closeCards());
     }
   }
 }

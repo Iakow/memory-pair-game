@@ -5,7 +5,6 @@
   thisScript.src += `?v=${new Date().toISOString()}`;
 }());
 
-/* All the images */
 const IMAGES = [
   'img/mask1.png',
   'img/mask2.png',
@@ -24,10 +23,6 @@ const IMAGES = [
   'img/mask16.png'
 ];
 
-// must be css value
-const CARD_BACK = `none`;
-
-/* preload */
 (function preloadImages() {
   const addLink = (href) => {
     const link = document.createElement('link');
@@ -41,8 +36,10 @@ const CARD_BACK = `none`;
   IMAGES.forEach(item => addLink(item));
 }());
 
-const MAPPING = new Map();
+const CARD_BACK = `none`; // css value of background-image
+const GAME_SIZE = 12;
 
+const MAPPING = new Map(); // div.card => background-image
 
 function setNewGame() {
   if (MAPPING.size) {
@@ -74,7 +71,7 @@ function setNewGame() {
     const mountPoint = document.querySelector('.container');
     const fragment = document.createDocumentFragment();
 
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= GAME_SIZE; i++) {
       const newCard = createCard();
 
       fragment.appendChild(newCard);
@@ -86,20 +83,22 @@ function setNewGame() {
 
   function setNewMaping() {
     function getImgSelection() {
-      const randomImgSet = [...IMAGES].sort(() => 0.5 - Math.random()).slice(0, 6);
+      const randomImgSet = [...IMAGES]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, GAME_SIZE / 2);
 
-      const shuffledImgSet = randomImgSet.concat(randomImgSet).sort(() => 0.5 - Math.random());
+      const shuffledDoubleSet = [...randomImgSet, ...randomImgSet].sort(() => 0.5 - Math.random());
 
-      return shuffledImgSet;
+      return shuffledDoubleSet;
     }
 
-    function resetAnimatedCardProps(card) {
+    function resetAnimatedCardProps(card) { // blocking css influence && prepare
       card.style.transform = `rotateY(0deg)`;
       card.style.backgroundImage = CARD_BACK;
-      // card.style.visibility = 'visible';
-      card.style.display = 'block';
+
       card.style.opacity = '100%';
       card.style.boxShadow = '';
+      card.style.display = 'block';
 
       return card;
     }
@@ -114,10 +113,9 @@ function setNewGame() {
 }
 
 setNewGame();
-//////////////////////  ANIMATION ///////////////////////////////////////////
 
 function animateFlip(delay, freq, ...cards) {
-  const getCardAngle = (card) => {
+  function getCardAngle(card) {
     const transformStr = card.style.transform;
     const angle = transformStr.split('(')[1].split('deg')[0];
     return +angle;
@@ -127,7 +125,7 @@ function animateFlip(delay, freq, ...cards) {
   const rotateDirection = angle === 0 ? 1 : -1;
   const angleIncrement = 5 * rotateDirection;
 
-  const toggleBGimage = () => {
+  function toggleBGimage() {
     cards.forEach((card) => {
       if (card.style.backgroundImage === CARD_BACK) {
         card.style.backgroundImage = MAPPING.get(card);
@@ -137,13 +135,13 @@ function animateFlip(delay, freq, ...cards) {
     })
   }
 
-  const animateFrame = () => {
+  function animateFrame() {
     angle += angleIncrement;
     cards.forEach(card => card.style.transform = `rotateY(${angle}deg)`);
   }
 
   return new Promise((resolve, reject) => {
-    const goAnimate = () => {
+    function goAnimate() {
       const interval = setInterval(() => {
         animateFrame();
 
@@ -194,15 +192,15 @@ function getHandler() {
   let startTime = Date.now();
   let bestScore = 0;
 
-  const checkMatch = () => {
+  function checkMatch() {
     return pickedCards[0].style.backgroundImage === pickedCards[1].style.backgroundImage
   }
 
-  const pickCard = (card) => {
+  function pickCard(card) {
     pickedCards.push(card);
   }
 
-  const checkWin = () => {
+  function checkWin() {
     const time = new Date(Date.now() - startTime);
     const currentScore = Math.round(100000000 / (moves * time));
 
@@ -241,11 +239,11 @@ function getHandler() {
   }
 
 
-  const openCard = (card) => {
+  function openCard(card) {
     return animateFlip(0, 6, card);
   }
 
-  const closeCards = () => {
+  function closeCards() {
     const [firstCard, secondCard] = pickedCards;
     moves++;
 
@@ -255,14 +253,14 @@ function getHandler() {
       });
   }
 
-  const findPair = (card) => {
+  function findPair(card) {
     return Array.from(MAPPING)
       .filter((item) => (
         item[0] !== card && item[1] === card.style.backgroundImage
       ))[0][0];
   }
 
-  const discardСards = () => {
+  function discardСards() {
     const [firstCard, secondCard] = pickedCards;
 
 
@@ -274,13 +272,12 @@ function getHandler() {
     return animateDiscard(200, firstCard, secondCard);
   }
 
-  return (e) => {
+  return function handler(e) {
     if (e.target.className !== 'card') return;
     if (discardedCards.some(card => card === e.target)) return;
     if (pickedCards.some((card) => card === e.target)) return;
     if (pickedCards.length === 2) return;
 
-    //pickedCards.push(e.target);
     pickCard(e.target);
 
     if (pickedCards.length === 1) {

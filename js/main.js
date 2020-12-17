@@ -202,7 +202,7 @@ function getHandler() {
 
     if (!bestScore) {
       bestScore = currentScore;
-      comment = 'Congratulations!'
+      comment = 'Congratulations! Now try to improve your result!'
     } else {
       if (bestScore > currentScore) {
         comment = 'You can better...'

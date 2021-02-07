@@ -1,45 +1,55 @@
-'use strict';
+"use strict";
+
+/* 1. Отбор карт для партии
+ * 2.
+ */
 
 (function disableCache() {
-  const thisScript = [...document.scripts].find((script) => script.src.match(/main.js/));
+  const thisScript = [...document.scripts].find((script) =>
+    script.src.match(/main.js/)
+  );
   thisScript.src += `?v=${new Date().toISOString()}`;
-}());
+})();
 
 const IMAGES = [
-  'img/mask1.png',
-  'img/mask2.png',
-  'img/mask3.png',
-  'img/mask4.png',
-  'img/mask5.png',
-  'img/mask6.png',
-  'img/mask7.png',
-  'img/mask9.png',
-  'img/mask10.png',
-  'img/mask11.png',
-  'img/mask12.png',
-  'img/mask13.png',
-  'img/mask14.png',
-  'img/mask15.png',
-  'img/mask16.png'
+  "img/mask1.png",
+  "img/mask2.png",
+  "img/mask3.png",
+  "img/mask4.png",
+  "img/mask5.png",
+  "img/mask6.png",
+  "img/mask7.png",
+  "img/mask9.png",
+  "img/mask10.png",
+  "img/mask11.png",
+  "img/mask12.png",
+  "img/mask13.png",
+  "img/mask14.png",
+  "img/mask15.png",
+  "img/mask16.png",
 ];
 
 (function preloadImages() {
   const addLink = (href) => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
+    const link = document.createElement("link");
+    link.rel = "preload";
     link.href = href;
-    link.as = 'image';
+    link.as = "image";
 
     document.head.appendChild(link);
-  }
+  };
 
-  IMAGES.forEach(item => addLink(item));
-}());
+  IMAGES.forEach((item) => addLink(item));
+})();
 
-const CARD_BACK = `none`; // css value of background-image
+const game = {};
+const render = {};
+const handler = {};
+
+const CARD_BACK = `none`; // это не нужно будет
 const GAME_SIZE = 12;
 
-const MAPPING = new Map(); // div.card => background-image
+const MAPPING = new Map(); // не нужно
 
 function setNewGame() {
   if (MAPPING.size) {
@@ -47,27 +57,27 @@ function setNewGame() {
   } else {
     mountGame();
     setNewMaping();
-    setTimeout(() => {
+    /* setTimeout(() => {
       alert([
         'It\'s time to learn to distinguish between masks!',
         'Well you know what to do... :)'
       ].join('\n\n'))
-    }, 600);
+    }, 600); */
   }
 
   function mountGame() {
     function createCard() {
-      const cardPlace = document.createElement('div');
-      cardPlace.className = 'cardPlace';
+      const cardPlace = document.createElement("div");
+      cardPlace.className = "cardPlace";
 
-      const card = document.createElement('div');
-      card.className = 'card';
+      const card = document.createElement("div");
+      card.className = "card";
       cardPlace.appendChild(card);
 
       return cardPlace;
     }
 
-    const mountPoint = document.querySelector('.container');
+    const mountPoint = document.querySelector(".container");
     const fragment = document.createDocumentFragment();
 
     for (let i = 1; i <= GAME_SIZE; i++) {
@@ -92,7 +102,7 @@ function setNewGame() {
     function resetAnimatedProps(card) {
       card.style.transform = `rotateY(0deg)`;
       card.style.backgroundImage = CARD_BACK;
-      card.style.display = '';
+      card.style.display = "";
 
       return card;
     }
@@ -102,7 +112,7 @@ function setNewGame() {
     MAPPING.forEach((value, card, map) => {
       map.set(card, `url("${newImgSet.pop()}")`);
       resetAnimatedProps(card);
-    })
+    });
   }
 }
 
@@ -111,7 +121,7 @@ setNewGame();
 function animateFlip(delay, freq, ...cards) {
   function getCardAngle(card) {
     const transformStr = card.style.transform;
-    const angle = transformStr.split('(')[1].split('deg')[0];
+    const angle = transformStr.split("(")[1].split("deg")[0];
     return +angle;
   }
 
@@ -126,12 +136,12 @@ function animateFlip(delay, freq, ...cards) {
       } else {
         card.style.backgroundImage = CARD_BACK;
       }
-    })
+    });
   }
 
   function animateFrame() {
     angle += angleIncrement;
-    cards.forEach(card => card.style.transform = `rotateY(${angle}deg)`);
+    cards.forEach((card) => (card.style.transform = `rotateY(${angle}deg)`));
   }
 
   return new Promise((resolve, reject) => {
@@ -144,12 +154,12 @@ function animateFlip(delay, freq, ...cards) {
         if (Math.abs(angle) % 180 === 0) {
           clearInterval(interval);
           resolve();
-        };
+        }
       }, freq);
-    };
+    }
 
     delay ? setTimeout(goAnimate, delay) : goAnimate();
-  })
+  });
 }
 
 function animateDiscard(delay, ...cards) {
@@ -162,16 +172,16 @@ function animateDiscard(delay, ...cards) {
       opacity += increment;
       shadowSpread -= increment * 2;
 
-      cards.forEach(card => {
-        card.style.opacity = `${opacity}%`
+      cards.forEach((card) => {
+        card.style.opacity = `${opacity}%`;
         card.style.boxShadow = `0px 0px 48px ${shadowSpread}px rgba(54,49,255,0.33), 0px 0px 28px 3px rgba(0,0,0,0.4)`;
       });
 
       if (opacity == 0) {
-        cards.forEach(card => {
+        cards.forEach((card) => {
           card.style.display = "none";
-          card.style.opacity = '';
-          card.style.boxShadow = '';
+          card.style.opacity = "";
+          card.style.boxShadow = "";
         });
         clearInterval(goAnimate);
         resolve();
@@ -179,7 +189,7 @@ function animateDiscard(delay, ...cards) {
     }, 20);
 
     delay ? setTimeout(goAnimate, delay) : goAnimate();
-  })
+  });
 }
 
 function getHandler() {
@@ -190,7 +200,10 @@ function getHandler() {
   let bestScore = 0;
 
   function checkMatch() {
-    return openedCards[0].style.backgroundImage === openedCards[1].style.backgroundImage
+    return (
+      openedCards[0].style.backgroundImage ===
+      openedCards[1].style.backgroundImage
+    );
   }
 
   function win() {
@@ -202,25 +215,27 @@ function getHandler() {
 
     if (!bestScore) {
       bestScore = currentScore;
-      comment = 'Congratulations! Now try to improve your result!'
+      comment = "Congratulations! Now try to improve your result!";
     } else {
       if (bestScore > currentScore) {
-        comment = 'You can better...'
+        comment = "You can better...";
       } else {
-        comment = 'This is your new record!!!';
+        comment = "This is your new record!!!";
         bestScore = currentScore;
       }
     }
 
     setTimeout(() => {
-      alert([
-        pastBestScore ? `Best result: ${pastBestScore}` : '',
-        '',
-        comment,
-        `Moves: ${moves}`,
-        `Time: ${time.getMinutes()}min ${time.getSeconds()}sec`,
-        `Score: ${currentScore}`
-      ].join('\n'));
+      alert(
+        [
+          pastBestScore ? `Best result: ${pastBestScore}` : "",
+          "",
+          comment,
+          `Moves: ${moves}`,
+          `Time: ${time.getMinutes()}min ${time.getSeconds()}sec`,
+          `Score: ${currentScore}`,
+        ].join("\n")
+      );
 
       discardedCards.length = 0;
       moves = 0;
@@ -239,15 +254,15 @@ function getHandler() {
     const [firstCard, secondCard] = openedCards;
     moves++;
 
-    animateFlip(300, 10, firstCard, secondCard)
-      .then(() => openedCards.length = 0);
+    animateFlip(300, 6, firstCard, secondCard).then(
+      () => (openedCards.length = 0)
+    );
   }
 
   function findPair(card) {
-    return Array.from(MAPPING)
-      .filter((item) => (
-        item[0] !== card && item[1] === card.style.backgroundImage
-      ))[0][0];
+    return Array.from(MAPPING).filter(
+      (item) => item[0] !== card && item[1] === card.style.backgroundImage
+    )[0][0];
   }
 
   function discardСards() {
@@ -261,24 +276,31 @@ function getHandler() {
     return animateDiscard(200, firstCard, secondCard);
   }
 
-  return function handler({target}) {
-    if (target.className !== 'card') return;
-    if (discardedCards.some(card => card === target)) return;
+  return function handler({ target }) {
+    if (target.className !== "card") return;
+    if (discardedCards.some((card) => card === target)) return;
     if (openedCards.some((card) => card === target)) return;
     if (openedCards.length === 2) return;
 
     if (openedCards.length === 0) {
+      // первая карта?
       openCard(target).then(() => {
-        if (discardedCards.length === (GAME_SIZE - 2)) {
+        if (discardedCards.length === GAME_SIZE - 2) {
+          // остались последние две?
           openCard(findPair(target))
             .then(() => discardСards())
             .then(() => win());
         }
       });
     } else if (openedCards.length === 1) {
-      openCard(target).then(() => checkMatch() ? discardСards() : closeCards());
+      // вторая карта?
+      openCard(target).then(() =>
+        checkMatch() ? discardСards() : closeCards()
+      );
     }
-  }
+
+    console.log([...document.querySelectorAll(".card")].indexOf(target));
+  };
 }
 
-document.querySelector('.container').addEventListener('click', getHandler());
+document.querySelector(".container").addEventListener("click", getHandler());

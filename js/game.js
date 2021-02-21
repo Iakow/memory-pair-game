@@ -90,6 +90,7 @@ function closeMismatchedPair() {
 }
 
 function discardMatchedPair() {
+  window.navigator.vibrate(100);
   matchMoves++;
   gameCards[openedCardsIDs[0]] = gameCards[openedCardsIDs[1]] = null;
   Render.animateDiscard(...openedCardsIDs).then(resetOpenedCards);

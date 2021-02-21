@@ -64,7 +64,7 @@ function completeMatch() {
       if (score >= bestScore) bestScore = score;
 
       Render.showResults(time, matchMoves, score, bestScore);
-      
+
       resolve();
     }, pauseToDiscardCard);
   });
@@ -72,7 +72,7 @@ function completeMatch() {
 
 function newMatch() {
   setMatch();
-  Render.showCards();
+  Render.showNewCards();
 }
 
 function openCard(pickedCardID) {

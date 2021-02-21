@@ -76,7 +76,7 @@ function showResults(time, moves, score, bestScore) {
   );
 }
 
-function showCards() {
+function showNewCards() {
   document
     .querySelectorAll(".card")
     .forEach((card) => card.removeAttribute("style"));
@@ -143,7 +143,7 @@ export {
   mountGame,
   animateClose,
   animateDiscard,
-  showCards,
+  showNewCards,
   greeting,
   showResults,
 };

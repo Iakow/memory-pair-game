@@ -119,6 +119,8 @@ function animateDiscard(...cardsID) {
       cardsID.forEach((cardID) => {
         resolve();
 
+        window.navigator.vibrate(100);
+
         const openedCard = document.getElementById(cardID);
 
         openedCard.classList.add("hiding");

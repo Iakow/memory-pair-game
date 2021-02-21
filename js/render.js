@@ -14,17 +14,17 @@ import { GAME_SIZE, IMAGES } from "./config.js";
   }
 })();
 
-const cardCheckingPause = 600;
-
-// анимации должны очищать все
+const timeToCheckCards = 600;
 
 function greeting() {
+  const mountAwaiting = 500;
+
   setTimeout(() => {
     alert(
       "It's time to learn to distinguish between masks!\n\n " +
         "Well you know what to do... :)"
     );
-  }, 500);
+  }, mountAwaiting);
 }
 
 function mountGame() {
@@ -49,6 +49,12 @@ function mountGame() {
 
     return cardPlace;
   }
+}
+
+function animateOpen(cardID, image) {
+  const card = document.getElementById(cardID);
+  card.classList.add("open");
+  card.style.backgroundImage = `none, url("./img/${image}")`;
 }
 
 function showResults(time, moves, score, bestScore) {
@@ -82,15 +88,9 @@ function showNewCards() {
     .forEach((card) => card.removeAttribute("style"));
 }
 
-function animateOpen(cardID, image) {
-  const card = document.getElementById(cardID);
-  card.classList.add("open");
-  card.style.backgroundImage = `none, url("./img/${image}")`;
-}
-
 function animateClose(...cardsID) {
   return new Promise((resolve) => {
-    const pause = setTimeout(() => {
+    setTimeout(() => {
       resolve();
 
       cardsID.forEach((cardID) => {
@@ -106,16 +106,15 @@ function animateClose(...cardsID) {
           e.target.classList.remove("closing");
           e.target.removeAttribute("style");
           e.target.removeEventListener("transitionend", clear);
-          clearInterval(pause);
         }
       }
-    }, cardCheckingPause);
+    }, timeToCheckCards);
   });
 }
 
 function animateDiscard(...cardsID) {
   return new Promise((resolve) => {
-    const interval = setTimeout(() => {
+    setTimeout(() => {
       cardsID.forEach((cardID) => {
         resolve();
 
@@ -129,14 +128,13 @@ function animateDiscard(...cardsID) {
 
         function removeCard(e) {
           if (e.propertyName === "opacity") {
-            openedCard.style.display = "none";
-            openedCard.classList.remove("hiding");
-            openedCard.removeEventListener("transitionend", removeCard);
-            clearInterval(interval);
+            e.target.style.display = "none";
+            e.target.classList.remove("hiding");
+            e.target.removeEventListener("transitionend", removeCard);
           }
         }
       });
-    }, cardCheckingPause);
+    }, timeToCheckCards);
   });
 }
 

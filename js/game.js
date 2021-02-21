@@ -23,7 +23,7 @@ export function pickCard(cardID) {
       if (checkIfLastPair())
         autoOpenLastCard()
           .then(discardMatchedPair)
-          .then(completeMatch) // не дожидается конца discardMatchedPair
+          .then(completeMatch)
           .then(newMatch);
       break;
     case 1:
@@ -55,7 +55,7 @@ function setMatch() {
 
 function completeMatch() {
   return new Promise((resolve) => {
-    const pauseToDiscardCard = 1400;
+    const awaitDiscardingLastCards = 1400;
 
     setTimeout(() => {
       const time = new Date(Date.now() - matchStartTime);
@@ -66,7 +66,7 @@ function completeMatch() {
       Render.showResults(time, matchMoves, score, bestScore);
 
       resolve();
-    }, pauseToDiscardCard);
+    }, awaitDiscardingLastCards);
   });
 }
 
@@ -86,13 +86,13 @@ function checkIfMatched() {
 
 function closeMismatchedPair() {
   matchMoves++;
-  Render.animateClose(...openedCardsIDs).then(resetOpenedCards);
+  Render.animateClose(...openedCardsIDs).then(clearOpenedCards);
 }
 
 function discardMatchedPair() {
   matchMoves++;
   gameCards[openedCardsIDs[0]] = gameCards[openedCardsIDs[1]] = null;
-  Render.animateDiscard(...openedCardsIDs).then(resetOpenedCards);
+  Render.animateDiscard(...openedCardsIDs).then(clearOpenedCards);
 }
 
 function checkIfLastPair() {
@@ -115,11 +115,6 @@ function autoOpenLastCard() {
   }
 }
 
-function resetOpenedCards() {
+function clearOpenedCards() {
   openedCardsIDs.length = 0;
 }
-
-/* возможно, было бы чище, если б модель ничего не знала про таймауты, а доверить это вью и контроллеру 
-   ведь по сути это и обязанности вью с контроллером
-   
-   хотя, не. Как мне тогда дожидаться анимции последних карт перед тем как сделать setMatch() */

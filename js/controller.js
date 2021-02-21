@@ -1,14 +1,11 @@
 import { pickCard } from "./game.js";
 
 export function handler({ target }) {
-  if (!target.classList.contains("card")) return;
+  if (target.classList.contains("card")) {
+    const cardIsAnimating =
+      target.classList.contains("hiding") ||
+      target.classList.contains("closing");
 
-  const handleIsBlocking =
-    target.classList.contains("hiding") ||
-    target.classList.contains("open") ||
-    target.classList.contains("closing");
-
-  if (handleIsBlocking) return;
-
-  pickCard([...document.querySelectorAll(".card")].indexOf(target));
+    if (!cardIsAnimating) pickCard(+target.id);
+  }
 }

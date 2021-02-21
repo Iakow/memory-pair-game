@@ -1,3 +1,9 @@
+:root {
+  --open-duration: 200ms;
+  --hiding-duration: 600ms;
+  --closing-duration: 400ms;
+}
+
 @media (max-aspect-ratio: 4/1) {
   :root {
     --columns: 4;
@@ -38,11 +44,6 @@ body {
   grid-template-columns: repeat(var(--columns), var(--card-size));
   grid-template-rows: repeat(var(--rows), var(--card-size));
   grid-gap: 10px;
-
-  /* default */
-  --open-duration: 200ms;
-  --hiding-duration: 600ms;
-  --closing-duration: 400ms;
 }
 
 .cardPlace {
@@ -65,15 +66,15 @@ body {
 }
 
 .open {
-  transition: transform var(--open-duration) linear,
-    background-size 1ms linear calc(var(--open-duration) / 2);
-  background-size: 0%, 100%;
   transform: rotateY(180deg);
+  background-size: 0%, 100%;
+  transition: transform var(--open-duration) linear,
+    background-size 0ms linear calc(var(--open-duration) / 2);
 }
 
 .closing {
   transition: transform var(--closing-duration) linear,
-    background-size 1ms linear calc(var(--closing-duration) / 2);
+    background-size 0ms linear calc(var(--closing-duration) / 2);
 }
 
 .hiding {

@@ -17,7 +17,3 @@ export const IMAGES = [
 ];
 
 export const GAME_SIZE = 12;
-
-export const OPEN_DURATION = 200;
-export const HIDING_DURATION = 400;
-export const CLOSING_DURATION = 600;

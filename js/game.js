@@ -58,8 +58,9 @@ function completeMatch() {
     const awaitDiscardingLastCards = 1400;
 
     setTimeout(() => {
+      const normalizeFactor = 100000000;
       const time = new Date(Date.now() - matchStartTime);
-      const score = Math.round(100000000 / (matchMoves * time));
+      const score = Math.round(normalizeFactor / (matchMoves * time));
 
       if (score >= bestScore) bestScore = score;
 
@@ -90,13 +91,15 @@ function closeMismatchedPair() {
 }
 
 function discardMatchedPair() {
+  const [firstID, secondID] = openedCardsIDs;
+
   matchMoves++;
-  gameCards[openedCardsIDs[0]] = gameCards[openedCardsIDs[1]] = null;
+  gameCards[firstID] = gameCards[secondID] = null;
   Render.animateDiscard(...openedCardsIDs).then(clearOpenedCards);
 }
 
 function checkIfLastPair() {
-  return gameCards.filter((card) => card != null).length === 2;
+  return gameCards.filter((card) => card).length === 2;
 }
 
 function autoOpenLastCard() {

@@ -1,13 +1,13 @@
 import * as Render from "./render.js";
 import { IMAGES, GAME_SIZE } from "./config.js";
 
+Render.preloadImages().then(Render.mountGame).then(Render.greeting);
+
 let gameCards;
 const openedCardsIDs = [];
 let bestScore = 0;
 let matchMoves, matchStartTime;
 
-Render.mountGame();
-Render.greeting();
 setMatch();
 
 export function pickCard(cardID) {
